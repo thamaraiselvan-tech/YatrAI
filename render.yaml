@@ -1,0 +1,25 @@
+services:
+  # Backend API Web Service
+  - type: web
+    name: yatrai-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.5
+      - key: GEMINI_API_KEY
+        sync: false # Enter your Gemini API key in the Render dashboard
+
+  # Frontend Static Site
+  - type: web
+    name: yatrai-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishDir: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: yatrai-backend
+          type: web
+          property: url
