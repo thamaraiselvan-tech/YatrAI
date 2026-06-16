@@ -34,9 +34,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.classList.contains('dark')
   })
-  const [showThemeTooltip, setShowThemeTooltip] = useState(() => {
-    return localStorage.getItem('yatrai_theme_tooltip_seen') !== 'true'
-  })
+  const [showThemeTooltip, setShowThemeTooltip] = useState(true)
 
   const [currentTime, setCurrentTime] = useState(new Date())
   useEffect(() => {
@@ -55,6 +53,7 @@ export default function App() {
   const handleLogin = useCallback((userData) => {
     setCurrentUser(userData)
     setIsLoggedIn(true)
+    setShowThemeTooltip(true)
     localStorage.setItem('yatrai_user', JSON.stringify(userData))
   }, [])
 
@@ -247,7 +246,19 @@ export default function App() {
             )
           })}
         </nav>
-        <div className="mt-auto pt-6 border-t border-outline-variant flex flex-col gap-3">
+        
+        {/* Coverage Warning Banner */}
+        <div className="mt-auto mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold flex items-start gap-2 select-none">
+          <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
+          <div>
+            <p className="font-bold font-outfit uppercase tracking-wider text-[9px] text-amber-500">Service Coverage</p>
+            <p className="mt-0.5 leading-normal font-sans font-medium text-slate-600 dark:text-slate-300">
+              Only major routes of Chennai and Trichy districts are integrated.
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t border-outline-variant flex flex-col gap-3">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold shadow-sm shrink-0">
@@ -333,7 +344,6 @@ export default function App() {
                 onClick={() => {
                   toggleTheme();
                   setShowThemeTooltip(false);
-                  localStorage.setItem('yatrai_theme_tooltip_seen', 'true');
                 }}
                 className="p-2 rounded-full transition-all duration-150 border border-transparent text-tertiary hover:text-on-surface hover:bg-surface-container-high flex items-center justify-center select-none active:scale-95"
                 title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -352,7 +362,6 @@ export default function App() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowThemeTooltip(false);
-                      localStorage.setItem('yatrai_theme_tooltip_seen', 'true');
                     }} 
                     className="hover:text-slate-300 ml-1 flex items-center justify-center shrink-0"
                     title="Dismiss hint"

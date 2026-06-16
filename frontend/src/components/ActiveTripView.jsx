@@ -917,7 +917,7 @@ ${segments.map((s, idx) => `  Leg ${idx + 1}: ${s.mode.replace(/_/g, ' ')} (${s.
           )}
 
           {/* History Card (Only visible on Desktop to save mobile space) */}
-          <div className="hidden lg:flex glass-panel rounded-3xl p-5">
+          <div className="hidden lg:flex flex-col glass-panel rounded-3xl p-5">
             <h3 className="font-label-lg text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Journey History</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-black/[0.04] dark:border-white/5">
