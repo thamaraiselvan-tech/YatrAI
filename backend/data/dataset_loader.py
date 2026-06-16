@@ -34,6 +34,8 @@ NODE_MAP = {
     "NIT Trichy / Kattur": "NIT_Trichy",
     "Kattur / NIT Trichy": "NIT_Trichy",
     "T.Nagar": "T_Nagar",
+    "Sholinganallur": "OMR_Sholinganallur",
+    "OMR Sholinganallur": "OMR_Sholinganallur",
     "AG-DMS": "AG_DMS",
     "BHEL Trichy": "BHEL_Township",
     "BHEL": "BHEL_Township",

@@ -73,6 +73,8 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
   const [activeField, setActiveField] = useState('destination')
   const [greenPoints, setGreenPoints] = useState(0)
   const [co2Saved, setCo2Saved] = useState(0)
+  const [searchMode, setSearchMode] = useState('voice')
+  const [voiceQuery, setVoiceQuery] = useState('')
   const suggestTimeout = useRef(null)
 
   const handlePlanDirect = useCallback(async (fromVal, toVal) => {
@@ -108,6 +110,7 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
 
   // Auto-split voice results into Origin and Destination
   const handleVoiceResult = useCallback((text) => {
+    setVoiceQuery(text)
     let cleanText = text.toLowerCase()
       .replace(/\bform\b/g, 'from')
       .replace(/\btoo\b/g, 'to')
@@ -140,13 +143,6 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
     getNearest(position.lat, position.lng)
       .then(data => {
         setNearestPlace(data)
-        // Auto-fill origin if it is currently empty
-        setOrigin(prev => {
-          if (!prev.trim()) {
-            return data.name || data.node.replace(/_/g, ' ')
-          }
-          return prev
-        })
       })
       .catch(() => {})
   }, [position?.lat, position?.lng])
@@ -188,13 +184,43 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
     if (!nearestPlace) return
     const name = nearestPlace.name || nearestPlace.node.replace(/_/g, ' ')
     setOrigin(name)
+    setSearchMode('manual')
   }, [nearestPlace])
 
   async function handlePlan(e) {
     e?.preventDefault()
-    const fromVal = origin.trim()
-    const toVal = destination.trim()
-    if (!fromVal || !toVal) return
+    let queryText = ''
+    if (searchMode === 'voice') {
+      queryText = voiceQuery.trim()
+      if (!queryText) return
+      
+      // Try to parse Origin/Destination from voice query to keep inputs in sync
+      let cleanText = queryText.toLowerCase()
+        .replace(/\bform\b/g, 'from')
+        .replace(/\btoo\b/g, 'to')
+        .replace(/\btwo\b/g, 'to')
+        .replace(/\b2\b/g, 'to')
+        .replace(/\bto\b/g, ' to ')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+      if (cleanText.includes(' to ')) {
+        const parts = cleanText.split(' to ')
+        const fromPart = parts[0].replace('from ', '').trim()
+        const toPart = parts[1].trim()
+        if (fromPart) {
+          setOrigin(fromPart.charAt(0).toUpperCase() + fromPart.slice(1))
+        }
+        if (toPart) {
+          setDestination(toPart.charAt(0).toUpperCase() + toPart.slice(1))
+        }
+      }
+    } else {
+      const fromVal = origin.trim()
+      const toVal = destination.trim()
+      if (!fromVal || !toVal) return
+      queryText = `from ${fromVal} to ${toVal}`
+    }
     
     setLoading(true)
     setError(null)
@@ -202,7 +228,6 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
     setSelectedMood(null)
     setShowSuggestions(false)
     try {
-      const queryText = `from ${fromVal} to ${toVal}`
       const data = await planTrip(queryText, disruptions.length ? disruptions : undefined)
       setResult(data)
       setSelectedMood(data.parsed?.mood ?? 'cheapest')
@@ -246,54 +271,118 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
               <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-secondary to-transparent opacity-20"></div>
             </div>
 
-            <form onSubmit={handlePlan} className="relative z-10 space-y-stack-md">
-              <div className="flex flex-col gap-unit">
-                {/* Origin Input */}
-                <div className="flex items-center gap-stack-sm h-[52px] bg-surface dark:bg-surface-container-highest rounded-xl px-4 border border-outline-variant shadow-sm focus-within:ring-2 focus-within:ring-secondary transition-all">
-                  <span className="w-2.5 h-2.5 rounded-full bg-secondary shrink-0"></span>
-                  <input
-                    type="text"
-                    value={origin}
-                    onFocus={() => { setActiveField('origin'); if (suggestions.length > 0) setShowSuggestions(true) }}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    onChange={(e) => handleQueryChange(e.target.value, 'origin')}
-                    placeholder="Enter starting location"
-                    className="bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface-variant w-full outline-none text-[13px]"
-                  />
-                </div>
+            {/* Search Mode Tab Switcher */}
+            <div className="flex bg-surface-container-high dark:bg-surface-container-highest p-1 rounded-xl mb-5 border border-outline-variant select-none">
+              <button
+                type="button"
+                onClick={() => setSearchMode('voice')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12.5px] font-outfit font-bold transition-all ${
+                  searchMode === 'voice'
+                    ? 'bg-secondary text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-secondary hover:bg-surface-container-highest/40'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                AI Voice Assistant
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchMode('manual')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12.5px] font-outfit font-bold transition-all ${
+                  searchMode === 'manual'
+                    ? 'bg-secondary text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-secondary hover:bg-surface-container-highest/40'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">directions</span>
+                Manual Route Planner
+              </button>
+            </div>
 
-                {/* Destination Input */}
-                <div className="flex items-center gap-stack-sm h-[52px] bg-surface dark:bg-surface-container-highest rounded-xl px-4 border border-outline-variant shadow-sm focus-within:ring-2 focus-within:ring-secondary transition-all">
-                  <span className="w-3 h-3 bg-secondary rounded-sm shrink-0"></span>
-                  <input
-                    type="text"
-                    value={destination}
-                    onFocus={() => { setActiveField('destination'); if (suggestions.length > 0) setShowSuggestions(true) }}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    onChange={(e) => handleQueryChange(e.target.value, 'destination')}
-                    placeholder="Central Railway Station"
-                    className="bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface w-full outline-none text-[13px]"
-                  />
+            <form onSubmit={handlePlan} className="relative z-10 space-y-4">
+              {searchMode === 'voice' ? (
+                /* AI Voice Mode */
+                <div className="space-y-3">
+                  <div className="flex items-center gap-stack-sm h-[54px] bg-surface dark:bg-surface-container-highest rounded-xl px-4 border border-outline-variant shadow-sm focus-glow transition-all relative">
+                    <span className="material-symbols-outlined text-secondary text-[20px] shrink-0">graphic_eq</span>
+                    <input
+                      type="text"
+                      value={voiceQuery}
+                      onChange={(e) => setVoiceQuery(e.target.value)}
+                      placeholder="Where do you want to go? (e.g. 'Airport to T Nagar')"
+                      className="bg-transparent border-none focus:ring-0 font-outfit text-[14.5px] font-semibold text-on-surface w-full outline-none placeholder-slate-400 dark:placeholder-slate-500 pr-10"
+                    />
+                    {supported && (
+                      <button
+                        type="button"
+                        onClick={listening ? stop : start}
+                        className={`absolute right-2 top-2 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                          listening
+                            ? 'bg-red-500 text-white animate-pulse'
+                            : 'bg-secondary/10 hover:bg-secondary/20 text-secondary'
+                        }`}
+                        title={listening ? 'Stop listening' : 'Start voice input'}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {listening ? 'mic_off' : 'mic'}
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-center text-[10px] font-extrabold tracking-widest text-slate-400 dark:text-slate-500 uppercase select-none font-outfit">
+                    Press mic or type your prompt above
+                  </p>
                 </div>
-              </div>
+              ) : (
+                /* Manual Route Planner Mode */
+                <div className="flex flex-col gap-3 relative">
+                  {/* Origin Input */}
+                  <div className="flex items-center gap-stack-sm h-[54px] bg-surface dark:bg-surface-container-highest rounded-xl px-4 border border-outline-variant shadow-sm focus-glow transition-all">
+                    <span className="material-symbols-outlined text-[20px] text-emerald-500 shrink-0">radio_button_checked</span>
+                    <input
+                      type="text"
+                      value={origin}
+                      onFocus={() => { setActiveField('origin'); if (suggestions.length > 0) setShowSuggestions(true) }}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      onChange={(e) => handleQueryChange(e.target.value, 'origin')}
+                      placeholder="Enter starting location"
+                      className="bg-transparent border-none focus:ring-0 font-outfit text-[14.5px] font-semibold text-on-surface w-full outline-none placeholder-slate-400 dark:placeholder-slate-500"
+                    />
+                  </div>
 
-              {/* Autocomplete suggestions overlay */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute left-0 right-0 top-[108px] z-50 bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-lg">
-                  {suggestions.map(s => (
-                    <button
-                      key={s.node}
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); insertSuggestion(s.name) }}
-                      className="w-full text-left px-4 py-3 hover:bg-surface-container-highest flex items-center gap-3 text-[12px] border-b border-outline-variant/10 last:border-0 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[16px] text-secondary">location_on</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate text-on-surface">{s.name}</p>
-                        <p className="text-on-surface-variant text-[11px] truncate">{s.area} · {s.city}</p>
-                      </div>
-                    </button>
-                  ))}
+                  {/* Destination Input */}
+                  <div className="flex items-center gap-stack-sm h-[54px] bg-surface dark:bg-surface-container-highest rounded-xl px-4 border border-outline-variant shadow-sm focus-glow transition-all">
+                    <span className="material-symbols-outlined text-[20px] text-rose-500 shrink-0">location_on</span>
+                    <input
+                      type="text"
+                      value={destination}
+                      onFocus={() => { setActiveField('destination'); if (suggestions.length > 0) setShowSuggestions(true) }}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      onChange={(e) => handleQueryChange(e.target.value, 'destination')}
+                      placeholder="Central Railway Station"
+                      className="bg-transparent border-none focus:ring-0 font-outfit text-[14.5px] font-semibold text-on-surface w-full outline-none placeholder-slate-400 dark:placeholder-slate-500"
+                    />
+                  </div>
+
+                  {/* Autocomplete suggestions overlay */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-lg">
+                      {suggestions.map(s => (
+                        <button
+                          key={s.node}
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); insertSuggestion(s.name) }}
+                          className="w-full text-left px-4 py-3 hover:bg-surface-container-highest flex items-center gap-3 text-[12px] border-b border-outline-variant/10 last:border-0 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[16px] text-secondary">location_on</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold truncate text-on-surface">{s.name}</p>
+                            <p className="text-on-surface-variant text-[11px] truncate">{s.area} · {s.city}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -303,31 +392,18 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => { setOrigin(j.from); setDestination(j.to); handlePlanDirect(j.from, j.to); }}
+                    onClick={() => { 
+                      setOrigin(j.from); 
+                      setDestination(j.to); 
+                      setSearchMode('manual');
+                      handlePlanDirect(j.from, j.to); 
+                    }}
                     className="flex-none bg-surface-container-high/40 text-on-surface-variant font-label-md text-label-md px-3 py-1.5 rounded-full border border-outline-variant hover:bg-surface-container-highest transition-colors text-[11px]"
                   >
                     {j.from} → {j.to}
                   </button>
                 ))}
               </div>
-
-              {/* AI Voice Microphone Button */}
-              {supported && (
-                <div className="flex justify-center mt-stack-lg">
-                  <button
-                    type="button"
-                    onClick={listening ? stop : start}
-                    className="w-16 h-16 bg-[#3B82F6] text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-all duration-300 relative group overflow-hidden"
-                  >
-                    {listening && (
-                      <div className="absolute inset-0 bg-white/20 animate-ping rounded-full opacity-30"></div>
-                    )}
-                    <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      {listening ? 'mic_off' : 'mic'}
-                    </span>
-                  </button>
-                </div>
-              )}
 
               {/* GPS Location Pill */}
               {nearestPlace && (
@@ -348,7 +424,7 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
               {/* Action button */}
               <button
                 type="submit"
-                disabled={loading || !destination.trim()}
+                disabled={loading || (searchMode === 'voice' ? !voiceQuery.trim() : (!origin.trim() || !destination.trim()))}
                 className="w-full bg-secondary text-white font-medium rounded-xl py-3.5 text-[15px] hover:brightness-110 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-secondary/15"
               >
                 {loading ? 'Routing...' : 'Get Travel Options'}
@@ -442,22 +518,28 @@ export default function PlannerView({ disruptions, onStartTrip, position, wallet
           {/* ── Widgets: Wallet & Points ── */}
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 select-none">
             {/* YatraWallet Widget */}
-            <div className="bg-surface-container-low p-stack-md rounded-2xl border border-outline-variant flex flex-col justify-between h-36">
-              <div>
-                <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-wider block">YatraWallet</span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="font-headline-md text-headline-md font-bold text-on-surface">₹{Math.round(walletAvailable)}</span>
+            <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 text-white p-stack-md rounded-2xl border border-white/10 flex flex-col justify-between h-36 overflow-hidden select-none group">
+              {/* Gloss Reflection Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+              
+              <div className="relative z-10">
+                <span className="font-label-sm text-label-sm text-white/50 uppercase tracking-widest block font-outfit font-bold">YatraWallet</span>
+                <div className="flex items-baseline gap-1.5 mt-1">
+                  <span className="font-headline-md text-headline-md font-bold text-white font-mono">₹{Math.round(walletAvailable)}</span>
                   {walletEscrow > 0 && (
-                    <span className="font-label-sm text-label-sm text-secondary font-bold ml-1">● ₹{Math.round(walletEscrow)} escrow</span>
+                    <span className="text-[11px] text-white/60 font-medium ml-1">● ₹{Math.round(walletEscrow)} escrow</span>
                   )}
                 </div>
               </div>
-              <button 
-                onClick={onTopUpClick}
-                className="bg-secondary text-white font-label-lg text-label-lg py-2 rounded-lg text-center hover:brightness-110 transition-all active:scale-95 text-[12px] font-bold"
-              >
-                Top Up
-              </button>
+              
+              <div className="relative z-10 w-full">
+                <button 
+                  onClick={onTopUpClick}
+                  className="bg-white hover:bg-slate-100 text-slate-900 font-bold py-2 rounded-full w-full text-[12px] transition-all duration-150 active:scale-95"
+                >
+                  Top Up
+                </button>
+              </div>
             </div>
 
             {/* GreenPoints Widget */}

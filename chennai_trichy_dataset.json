@@ -13,7 +13,7 @@
       "Southern Railway",
       "City Bus Trichy"
     ],
-    "total_routes": 726,
+    "total_routes": 728,
     "coverage": "Major + Minor routes, Metro, Suburban Rail, MRTS"
   },
   "cities": {
@@ -21281,6 +21281,35 @@
                 "lng": 80.26
               }
             ]
+          },
+          {
+            "route_id": "MTC-ITX-1",
+            "route_number": "ITX-1",
+            "name": "IT Corridor Express",
+            "operator": "MTC",
+            "type": "express",
+            "distance_km": 20.8,
+            "duration_min": 40,
+            "frequency_min": 20,
+            "first_bus": "06:00",
+            "last_bus": "22:00",
+            "fare_min": 45,
+            "fare_max": 45,
+            "ac": false,
+            "stops": [
+              {
+                "seq": 1,
+                "name": "Sholinganallur",
+                "lat": 12.901,
+                "lng": 80.2279
+              },
+              {
+                "seq": 2,
+                "name": "Chennai Central",
+                "lat": 13.0827,
+                "lng": 80.275
+              }
+            ]
           }
         ],
         "ac_volvo": [
@@ -22749,6 +22778,35 @@
                 "name": "Selaiyur",
                 "lat": 12.908,
                 "lng": 80.142
+              }
+            ]
+          },
+          {
+            "route_id": "MTC-VIP-1",
+            "route_number": "VIP-1",
+            "name": "VIP Airport Shuttle",
+            "operator": "MTC",
+            "type": "ac_volvo",
+            "distance_km": 8.7,
+            "duration_min": 25,
+            "frequency_min": 15,
+            "first_bus": "05:00",
+            "last_bus": "23:00",
+            "fare_min": 60,
+            "fare_max": 60,
+            "ac": true,
+            "stops": [
+              {
+                "seq": 1,
+                "name": "Chennai Airport",
+                "lat": 12.9941,
+                "lng": 80.1709
+              },
+              {
+                "seq": 2,
+                "name": "T.Nagar",
+                "lat": 13.0418,
+                "lng": 80.2341
               }
             ]
           }

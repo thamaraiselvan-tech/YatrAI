@@ -230,8 +230,13 @@ def _resolve_node(text: str) -> Optional[str]:
     return None
 
 
-def _extract_time(query: str) -> int:
-    """Extract departure time from query. Default: 480 (8:00 AM)."""
+def _extract_time(query: str, default_time: Optional[int] = None) -> int:
+    """Extract departure time from query. Default: current time."""
+    if default_time is None:
+        from datetime import datetime
+        now = datetime.now()
+        default_time = now.hour * 60 + now.minute
+
     # Match patterns like "8am", "8:30 am", "14:00", "2 pm", "morning", "evening"
     time_match = re.search(r'(\d{1,2})\s*:\s*(\d{2})\s*(am|pm)?', query, re.IGNORECASE)
     if time_match:
@@ -268,7 +273,7 @@ def _extract_time(query: str) -> int:
         now = datetime.now()
         return now.hour * 60 + now.minute
 
-    return 480  # Default: 8 AM
+    return default_time
 
 
 def _detect_mood(query: str) -> str:
@@ -280,7 +285,7 @@ def _detect_mood(query: str) -> str:
     return "fastest"  # Default
 
 
-def _fallback_parse(query: str) -> Dict[str, Any]:
+def _fallback_parse(query: str, current_time_min: int) -> Dict[str, Any]:
     """
     Keyword-based fallback parser when Gemini is unavailable.
     Extracts start/end nodes, time, mood, and Tamil flag from natural language.
@@ -323,7 +328,7 @@ def _fallback_parse(query: str) -> Dict[str, Any]:
     return {
         "start_node": start_node,
         "target_node": target_node,
-        "start_time_min": _extract_time(query),
+        "start_time_min": _extract_time(query, current_time_min),
         "mood": _detect_mood(query),
         "is_tamil": is_tamil,
     }
@@ -343,6 +348,10 @@ def parse_user_query(query: str) -> Dict[str, Any]:
             "is_tamil": bool,
         }
     """
+    from datetime import datetime
+    now = datetime.now()
+    current_time_min = now.hour * 60 + now.minute
+
     if _client:
         try:
             from data.database import COORDINATES
@@ -351,7 +360,7 @@ def parse_user_query(query: str) -> Dict[str, Any]:
 Parse the user travel query and extract:
 1. start_node: The starting location (must be one of: {', '.join(node_list)})
 2. target_node: The destination (must be one of: {', '.join(node_list)})
-3. start_time_min: Departure time in minutes from midnight (e.g., 8:00 AM = 480)
+3. start_time_min: Departure time in minutes from midnight (e.g., 8:00 AM = 480). If the query does not specify a specific time (e.g. 10am, 2pm, etc.), you MUST default to the current time: {current_time_min}.
 4. mood: One of "fastest", "cheapest", "greenest", "safest"
 5. is_tamil: true if the query is in Tamil or Tanglish
 
@@ -377,7 +386,7 @@ User query: "{query}"
             if parsed.get("mood") not in ("fastest", "cheapest", "greenest", "safest"):
                 parsed["mood"] = "fastest"
             if not isinstance(parsed.get("start_time_min"), (int, float)):
-                parsed["start_time_min"] = _extract_time(query)
+                parsed["start_time_min"] = _extract_time(query, current_time_min)
             parsed["is_tamil"] = parsed.get("is_tamil", _detect_tamil(query))
 
             return parsed
@@ -385,7 +394,7 @@ User query: "{query}"
             pass
 
     # Fallback
-    return _fallback_parse(query)
+    return _fallback_parse(query, current_time_min)
 
 
 def generate_bilingual_brief(query: str, route: Dict[str, Any], is_tamil: bool) -> Dict[str, str]:

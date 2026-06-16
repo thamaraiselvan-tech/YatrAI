@@ -110,31 +110,33 @@ export default function SegmentTimeline({ route }) {
   const isDark = document.documentElement.classList.contains('dark')
 
   return (
-    <div className="flex flex-col gap-4 animate-fade-in-up">
+    <div className="glass-panel rounded-3xl p-5 flex flex-col gap-5 animate-fade-in-up">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-outline-variant pb-3 select-none">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-secondary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>route</span>
+          <h3 className="font-outfit font-bold text-[14px] text-on-surface">Selected Route Timeline</h3>
+        </div>
+        <div className="flex gap-2 text-[11px] font-bold">
+          <span className="bg-[#1E3A8A]/5 dark:bg-[#6366F1]/5 text-secondary px-2.5 py-1 rounded-full border border-outline-variant font-sans">
+            ⏱ {Math.round(route.total_time)} min
+          </span>
+          <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 font-sans">
+            ₹{route.total_fare}
+          </span>
+        </div>
+      </div>
+
       {/* Leaflet Map */}
-      <div className="relative overflow-hidden rounded-2xl border border-outline-variant shadow-sm h-52">
+      <div className="relative overflow-hidden rounded-2xl border border-outline-variant shadow-inner h-52 w-full">
         <LeafletMap segments={segments} />
-        <div className="absolute top-3 left-3 px-2 py-0.5 bg-surface/90 border border-outline-variant text-on-surface text-[12px] font-medium rounded-full shadow">
-          Journey Route Map
+        <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 border border-outline-variant text-on-surface text-[11px] font-semibold rounded-full shadow-sm z-10 select-none">
+          Route Map
         </div>
       </div>
 
       {/* Segment Steps */}
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between px-1 mb-2">
-          <p className="text-[12px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-outfit">
-            Route Timeline
-          </p>
-          <div className="flex gap-2 text-[12px] font-medium">
-            <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full border border-black/[0.05] dark:border-white/[0.05]">
-              {Math.round(route.total_time)} min
-            </span>
-            <span className="bg-emerald-100 dark:bg-emerald-950/20 text-[#10B981] px-2 py-0.5 rounded-full border border-[#10B981]/20">
-              ₹{route.total_fare}
-            </span>
-          </div>
-        </div>
-
+      <div className="flex flex-col gap-3">
         <div className="flex flex-col">
           {segments.map((seg, i) => {
             const theme = LEG_THEME[seg.mode] || LEG_THEME.Walk
@@ -161,7 +163,7 @@ export default function SegmentTimeline({ route }) {
             }
 
             return (
-              <div key={i} className="flex flex-col w-full">
+              <div key={i} className="flex flex-col w-full animate-fade-in-up">
                 {/* Leg card */}
                 <div className="relative flex rounded-xl bg-surface border border-outline-variant shadow-sm overflow-hidden dark:bg-[#111827]">
                   {/* Left rail strip */}
@@ -217,7 +219,7 @@ export default function SegmentTimeline({ route }) {
                         ₹{seg.fare}
                       </span>
                       {/* Duration */}
-                      <span className="text-[13px] font-normal text-slate-500 dark:text-slate-400">
+                      <span className="text-[13px] font-normal text-slate-500 dark:text-slate-400 font-sans">
                         {Math.round(seg.duration)} min
                       </span>
                     </div>
@@ -236,7 +238,7 @@ export default function SegmentTimeline({ route }) {
 
           {/* Final destination node */}
           {segments.length > 0 && (
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full animate-fade-in-up">
               <div className="flex justify-center w-full my-1">
                 <div className="w-[2px] h-3 border-l-2 border-dashed border-outline-variant" />
               </div>
@@ -246,10 +248,10 @@ export default function SegmentTimeline({ route }) {
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-[#0F172A] dark:text-[#F9FAFB] truncate">
+                  <p className="text-[13px] font-semibold text-[#0F172A] dark:text-[#F9FAFB] truncate font-sans">
                     {segments[segments.length - 1]?.to_node.replace(/_/g, ' ')}
                   </p>
-                  <p className="text-[12px] text-slate-400 mt-0.5">{route.end_time_str} — Arrival</p>
+                  <p className="text-[12px] text-slate-400 mt-0.5 font-sans">{route.end_time_str} — Arrival</p>
                 </div>
               </div>
             </div>

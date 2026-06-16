@@ -34,12 +34,22 @@ def initialize_wallet():
 
 
 def read_wallet() -> Dict[str, Any]:
-    """Read the current wallet state."""
+    """Read the current wallet state and compute active escrow locked total."""
     path = _wallet_path()
     if not os.path.exists(path):
         initialize_wallet()
     with open(path, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+    
+    # Calculate total locked escrow
+    total_locked = 0.0
+    for trip_id, escrow in data.get("escrows", {}).items():
+        if escrow.get("status") == "locked":
+            for seg in escrow.get("segments", []):
+                if not seg.get("released", False):
+                    total_locked += seg.get("fare", 0.0)
+    data["escrow_locked"] = round(total_locked, 2)
+    return data
 
 
 def _save_wallet(data: Dict[str, Any]):

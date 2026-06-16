@@ -710,7 +710,7 @@ ${segments.map((s, idx) => `  Leg ${idx + 1}: ${s.mode.replace(/_/g, ' ')} (${s.
             </div>
             <button 
               onClick={handleDownloadInvoice}
-              className="w-full py-3 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-xl font-label-md transition-all active:scale-[0.99]"
+              className="w-full py-3 bg-gradient-to-r from-secondary to-accent hover:shadow-md hover:shadow-secondary/15 text-white rounded-xl font-bold text-[13px] uppercase tracking-wider transition-all active:scale-[0.99] select-none"
             >
               Download PDF Invoice
             </button>
@@ -727,7 +727,7 @@ ${segments.map((s, idx) => `  Leg ${idx + 1}: ${s.mode.replace(/_/g, ' ')} (${s.
             </div>
             <div className="h-2 bg-slate-100 dark:bg-[#0A0F1E] rounded-full overflow-hidden border border-black/[0.05] dark:border-white/[0.05]">
               <div
-                className="h-full bg-[#3B82F6] transition-all duration-500"
+                className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-500"
                 style={{ 
                   width: `${((currentSegIdx) / segments.length) * 100}%`
                 }}
@@ -737,22 +737,39 @@ ${segments.map((s, idx) => `  Leg ${idx + 1}: ${s.mode.replace(/_/g, ' ')} (${s.
 
           {/* Voice navigation instruction */}
           {segment && (
-            <div className="glass-panel rounded-2xl p-4 flex items-start gap-3 border-l-4 border-[#3B82F6]">
-              <span className="material-symbols-outlined text-[20px] text-secondary shrink-0">volume_up</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{segment.instruction_en}</p>
-                {segment.instruction_ta && (
-                  <p className="text-[12px] text-slate-400 mt-1.5 italic border-t border-black/[0.05] dark:border-white/[0.05] pt-1.5 leading-relaxed">{segment.instruction_ta}</p>
+            <div className="glass-panel rounded-2xl p-4 flex flex-col gap-3.5 border-l-4 border-secondary animate-fade-in-up">
+              <div className="flex items-center justify-between border-b border-outline-variant/40 pb-2 select-none">
+                <div className="flex items-center gap-2 text-secondary">
+                  <span className="material-symbols-outlined text-[18px] animate-pulse">volume_up</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-outfit">Voice Navigation Guidance</span>
+                </div>
+                {voice?.enabled && (
+                  <button
+                    onClick={() => voice.speakSegment(segment)}
+                    className="shrink-0 text-[11px] font-bold px-3 py-1 rounded-lg bg-secondary/10 text-secondary border border-secondary/15 hover:bg-secondary/20 transition-all duration-100 active:scale-95 flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[12px]">replay</span>
+                    <span>Replay Audio</span>
+                  </button>
                 )}
               </div>
-              {voice?.enabled && (
-                <button
-                  onClick={() => voice.speakSegment(segment)}
-                  className="shrink-0 text-[12px] font-medium px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
-                >
-                  Replay
-                </button>
-              )}
+              
+              <div className="flex-1 min-w-0 font-sans">
+                <p className="text-[13px] text-slate-800 dark:text-[#F9FAFB] font-medium leading-relaxed font-sans">
+                  {segment.instruction_en}
+                </p>
+                {segment.instruction_ta && (
+                  <div className="mt-3 bg-surface-container/50 dark:bg-surface-container-high/40 p-3 rounded-xl border border-outline-variant text-[12.5px] leading-relaxed text-secondary-container-on font-medium">
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1 flex items-center gap-1 select-none">
+                      <span className="material-symbols-outlined text-[12px]">translate</span>
+                      தமிழ் உரைபெயர்ப்பு (Tamil Translation)
+                    </p>
+                    <p className="text-on-surface-variant italic font-outfit leading-relaxed">
+                      {segment.instruction_ta}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -777,7 +794,7 @@ ${segments.map((s, idx) => `  Leg ${idx + 1}: ${s.mode.replace(/_/g, ' ')} (${s.
                   <span className="material-symbols-outlined text-[14px]">calendar_today</span>
                   <span>08:00 AM • Today</span>
                 </div>
-                <div className="bg-secondary/20 border border-secondary text-secondary-fixed text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full select-none">
+                <div className="bg-secondary/20 border border-secondary text-secondary text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full select-none">
                   VALID
                 </div>
               </div>
@@ -827,16 +844,17 @@ ${segments.map((s, idx) => `  Leg ${idx + 1}: ${s.mode.replace(/_/g, ' ')} (${s.
           <div className="flex gap-3 mt-2">
             <button
               onClick={onCancelTrip}
-              className="flex-1 flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/20 border border-red-500/20
-                         text-red-600 dark:text-red-400 font-semibold rounded-xl py-3.5 text-[14px] hover:bg-red-100/50 active:scale-95 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 bg-red-50 dark:bg-rose-500/10 border border-red-500/10 hover:border-red-500/20
+                         text-red-600 dark:text-rose-400 font-semibold rounded-xl py-3.5 text-[14px] hover:bg-red-100/50 dark:hover:bg-rose-500/20 active:scale-95 transition-all select-none"
             >
               <span className="material-symbols-outlined text-[18px]">close</span> Cancel Trip
             </button>
             <button
               onClick={handleComplete}
               disabled={passType === 'upi_scan' && !segDone}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-blue-600 text-white
-                         font-medium rounded-xl py-3.5 text-[14px] disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all shadow-md shadow-blue-500/20"
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent hover:shadow-md hover:shadow-secondary/15 text-white
+                         font-bold uppercase tracking-wider rounded-xl py-3.5 text-[13px] active:scale-95 transition-all 
+                         disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 dark:disabled:from-slate-800/40 dark:disabled:to-slate-800/40 dark:disabled:text-slate-600 disabled:shadow-none disabled:pointer-events-none"
             >
               <span className="material-symbols-outlined text-[18px]">check_circle</span>
               {isLast ? 'Complete Trip' : 'Next Step'}

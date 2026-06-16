@@ -1,5 +1,5 @@
 {
-  "balance": 333.2,
+  "balance": 2625.3,
   "currency": "INR",
   "transactions": [
     {
@@ -329,6 +329,212 @@
       "segment_index": 1,
       "timestamp": "2026-06-15T22:57:09.950809",
       "description": "Segment 1 released: Ucchi_Pillayar_Temple \u2192 Breeaks_Road via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-B706DEC1",
+      "type": "escrow_lock",
+      "amount": -13.2,
+      "trip_id": "TRIP-E480F2",
+      "timestamp": "2026-06-16T03:05:41.159048",
+      "description": "Escrow locked for trip TRIP-E480F2: \u20b913.20"
+    },
+    {
+      "id": "TXN-436AA8D0",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 0,
+      "timestamp": "2026-06-16T03:06:11.156956",
+      "description": "Segment 0 released: Rockfort_Temple \u2192 Femina_Mall_Trichy via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-44671DFB",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 1,
+      "timestamp": "2026-06-16T03:06:11.921339",
+      "description": "Segment 1 released: Femina_Mall_Trichy \u2192 Sastri_Road via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-6977E805",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 2,
+      "timestamp": "2026-06-16T03:06:12.511879",
+      "description": "Segment 2 released: Sastri_Road \u2192 GVN_Hospital_Trichy via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-A27614BC",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 3,
+      "timestamp": "2026-06-16T03:06:13.173342",
+      "description": "Segment 3 released: GVN_Hospital_Trichy \u2192 Thillai_Nagar via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-C4DC13E3",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 4,
+      "timestamp": "2026-06-16T03:06:13.872383",
+      "description": "Segment 4 released: Thillai_Nagar \u2192 Thillai_Nagar_Trichy via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-175E5FF9",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 5,
+      "timestamp": "2026-06-16T03:06:14.456204",
+      "description": "Segment 5 released: Thillai_Nagar_Trichy \u2192 Keelambikapuram via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-DA0CAD71",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 6,
+      "timestamp": "2026-06-16T03:06:15.039064",
+      "description": "Segment 6 released: Keelambikapuram \u2192 Puthur via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-B24CE94A",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 7,
+      "timestamp": "2026-06-16T03:06:15.563454",
+      "description": "Segment 7 released: Puthur \u2192 Kailasapuram via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-0AE6FFCD",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 8,
+      "timestamp": "2026-06-16T03:06:16.229236",
+      "description": "Segment 8 released: Kailasapuram \u2192 Golden_Rock via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-35F3A3C4",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-E480F2",
+      "segment_index": 9,
+      "timestamp": "2026-06-16T03:06:17.675047",
+      "description": "Segment 9 released: Golden_Rock \u2192 Pettavaithalai_Road via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-ED244D21",
+      "type": "escrow_refund",
+      "amount": 13.2,
+      "trip_id": "TRIP-E480F2",
+      "timestamp": "2026-06-16T03:06:37.083280",
+      "description": "Escrow refund for trip TRIP-E480F2: \u20b913.20"
+    },
+    {
+      "id": "TXN-0363BD2D",
+      "type": "escrow_lock",
+      "amount": -136.8,
+      "trip_id": "TRIP-16FAB4",
+      "timestamp": "2026-06-16T04:56:53.398121",
+      "description": "Escrow locked for trip TRIP-16FAB4: \u20b9136.80"
+    },
+    {
+      "id": "TXN-5BC9C851",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-16FAB4",
+      "segment_index": 0,
+      "timestamp": "2026-06-16T04:57:30.388140",
+      "description": "Segment 0 released: Rockfort_Temple \u2192 Ucchi_Pillayar_Temple via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-CD6D641C",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-16FAB4",
+      "segment_index": 1,
+      "timestamp": "2026-06-16T04:57:31.037000",
+      "description": "Segment 1 released: Ucchi_Pillayar_Temple \u2192 Breeaks_Road via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-F449E5B5",
+      "type": "segment_release",
+      "amount": -67.7,
+      "trip_id": "TRIP-16FAB4",
+      "segment_index": 2,
+      "timestamp": "2026-06-16T04:57:34.957256",
+      "description": "Segment 2 released: Breeaks_Road \u2192 Thiruverumbur via Rapido_Bike (\u20b967.70)"
+    },
+    {
+      "id": "TXN-1519C6A6",
+      "type": "segment_release",
+      "amount": -69.1,
+      "trip_id": "TRIP-16FAB4",
+      "segment_index": 3,
+      "timestamp": "2026-06-16T04:57:36.707262",
+      "description": "Segment 3 released: Thiruverumbur \u2192 NIT_Trichy via Rapido_Bike (\u20b969.10)"
+    },
+    {
+      "id": "TXN-A5230E3E",
+      "type": "escrow_lock",
+      "amount": -71.1,
+      "trip_id": "TRIP-4B9E1D",
+      "timestamp": "2026-06-16T08:11:07.480259",
+      "description": "Escrow locked for trip TRIP-4B9E1D: \u20b971.10"
+    },
+    {
+      "id": "TXN-852AF83A",
+      "type": "segment_release",
+      "amount": -35.8,
+      "trip_id": "TRIP-4B9E1D",
+      "segment_index": 0,
+      "timestamp": "2026-06-16T08:11:36.814650",
+      "description": "Segment 0 released: Trichy_Junction \u2192 Villupuram via Suburban_Train (\u20b935.80)"
+    },
+    {
+      "id": "TXN-D6B0D69F",
+      "type": "segment_release",
+      "amount": -35.3,
+      "trip_id": "TRIP-4B9E1D",
+      "segment_index": 1,
+      "timestamp": "2026-06-16T08:11:40.210768",
+      "description": "Segment 1 released: Villupuram \u2192 Chennai_Egmore via Suburban_Train (\u20b935.30)"
+    },
+    {
+      "id": "TXN-6FC354B3",
+      "type": "segment_release",
+      "amount": 0,
+      "trip_id": "TRIP-4B9E1D",
+      "segment_index": 2,
+      "timestamp": "2026-06-16T08:11:46.279861",
+      "description": "Segment 2 released: Chennai_Egmore \u2192 Chennai_Central via Walk (\u20b90.00)"
+    },
+    {
+      "id": "TXN-2C95D0B5",
+      "type": "deposit",
+      "amount": 1000.0,
+      "timestamp": "2026-06-16T08:35:46.881655",
+      "description": "UPI deposit of \u20b91000.00"
+    },
+    {
+      "id": "TXN-69A6B333",
+      "type": "deposit",
+      "amount": 1000.0,
+      "timestamp": "2026-06-16T08:35:58.266826",
+      "description": "UPI deposit of \u20b91000.00"
+    },
+    {
+      "id": "TXN-0D0B4FF7",
+      "type": "deposit",
+      "amount": 500.0,
+      "timestamp": "2026-06-16T08:36:07.313915",
+      "description": "UPI deposit of \u20b9500.00"
     }
   ],
   "escrows": {
@@ -985,6 +1191,180 @@
         }
       ],
       "status": "locked"
+    },
+    "TRIP-E480F2": {
+      "total_fare": 13.2,
+      "locked_at": "2026-06-16T03:05:41.158822",
+      "segments": [
+        {
+          "index": 0,
+          "from_node": "Rockfort_Temple",
+          "to_node": "Femina_Mall_Trichy",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 1,
+          "from_node": "Femina_Mall_Trichy",
+          "to_node": "Sastri_Road",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 2,
+          "from_node": "Sastri_Road",
+          "to_node": "GVN_Hospital_Trichy",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 3,
+          "from_node": "GVN_Hospital_Trichy",
+          "to_node": "Thillai_Nagar",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 4,
+          "from_node": "Thillai_Nagar",
+          "to_node": "Thillai_Nagar_Trichy",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 5,
+          "from_node": "Thillai_Nagar_Trichy",
+          "to_node": "Keelambikapuram",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 6,
+          "from_node": "Keelambikapuram",
+          "to_node": "Puthur",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 7,
+          "from_node": "Puthur",
+          "to_node": "Kailasapuram",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 8,
+          "from_node": "Kailasapuram",
+          "to_node": "Golden_Rock",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 9,
+          "from_node": "Golden_Rock",
+          "to_node": "Pettavaithalai_Road",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 10,
+          "from_node": "Pettavaithalai_Road",
+          "to_node": "Tiruverumbur_Railway_Gate",
+          "mode": "Town_Bus",
+          "fare": 6.2,
+          "released": false
+        },
+        {
+          "index": 11,
+          "from_node": "Tiruverumbur_Railway_Gate",
+          "to_node": "NIT_Trichy",
+          "mode": "Town_Bus",
+          "fare": 7,
+          "released": false
+        }
+      ],
+      "status": "refunded"
+    },
+    "TRIP-16FAB4": {
+      "total_fare": 136.8,
+      "locked_at": "2026-06-16T04:56:53.398029",
+      "segments": [
+        {
+          "index": 0,
+          "from_node": "Rockfort_Temple",
+          "to_node": "Ucchi_Pillayar_Temple",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 1,
+          "from_node": "Ucchi_Pillayar_Temple",
+          "to_node": "Breeaks_Road",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        },
+        {
+          "index": 2,
+          "from_node": "Breeaks_Road",
+          "to_node": "Thiruverumbur",
+          "mode": "Rapido_Bike",
+          "fare": 67.7,
+          "released": true
+        },
+        {
+          "index": 3,
+          "from_node": "Thiruverumbur",
+          "to_node": "NIT_Trichy",
+          "mode": "Rapido_Bike",
+          "fare": 69.1,
+          "released": true
+        }
+      ],
+      "status": "completed"
+    },
+    "TRIP-4B9E1D": {
+      "total_fare": 71.1,
+      "locked_at": "2026-06-16T08:11:07.480157",
+      "segments": [
+        {
+          "index": 0,
+          "from_node": "Trichy_Junction",
+          "to_node": "Villupuram",
+          "mode": "Suburban_Train",
+          "fare": 35.8,
+          "released": true
+        },
+        {
+          "index": 1,
+          "from_node": "Villupuram",
+          "to_node": "Chennai_Egmore",
+          "mode": "Suburban_Train",
+          "fare": 35.3,
+          "released": true
+        },
+        {
+          "index": 2,
+          "from_node": "Chennai_Egmore",
+          "to_node": "Chennai_Central",
+          "mode": "Walk",
+          "fare": 0,
+          "released": true
+        }
+      ],
+      "status": "completed"
     }
-  }
+  },
+  "escrow_locked": 986.9
 }

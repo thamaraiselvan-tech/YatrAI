@@ -34,6 +34,23 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.classList.contains('dark')
   })
+  const [showThemeTooltip, setShowThemeTooltip] = useState(() => {
+    return localStorage.getItem('yatrai_theme_tooltip_seen') !== 'true'
+  })
+
+  const [currentTime, setCurrentTime] = useState(new Date())
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const PAGE_TITLES = {
+    planner: 'Transit Planner',
+    map: 'Live Journey Map',
+    pass: 'Digital Commute Pass',
+    wallet: 'YatraWallet Hub',
+    profile: 'Travel Journal'
+  }
 
   const handleLogin = useCallback((userData) => {
     setCurrentUser(userData)
@@ -188,24 +205,30 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface font-sans lg:flex transition-colors duration-150 overflow-x-hidden">
+    <div className="min-h-screen bg-background text-on-surface font-sans lg:flex transition-colors duration-150 overflow-x-hidden">
       {/* Desktop Sidebar Navigation */}
-      <aside className={`${isMobileDrawerOpen ? 'flex' : 'hidden'} lg:flex flex-col w-64 h-screen fixed left-0 top-0 bg-surface border-r border-outline-variant z-50 p-6 select-none`}>
-        <div className="mb-10 flex items-center justify-between">
-          <h1 className="font-headline-md text-headline-md font-bold text-secondary">YatrAI</h1>
-          <button 
-            onClick={() => setIsMobileDrawerOpen(false)}
-            className="lg:hidden material-symbols-outlined text-on-surface hover:bg-surface-container-highest transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out select-none"
-          >
-            close
-          </button>
+      <aside className={`${isMobileDrawerOpen ? 'flex' : 'hidden'} lg:flex flex-col w-64 h-screen fixed left-0 top-0 bg-surface border-r border-outline-variant z-50 p-6 select-none shadow-sm lg:shadow-none`}>
+        <div className="mb-6 flex flex-col gap-0.5">
+          <div className="flex items-center justify-between">
+            <h1 className="font-headline-md text-headline-md font-black tracking-tight text-on-surface">
+              YatrAI
+            </h1>
+            <button 
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="lg:hidden material-symbols-outlined text-on-surface hover:bg-surface-container-highest transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out select-none"
+            >
+              close
+            </button>
+          </div>
+          <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-tertiary">Unified Mobility Planner</span>
+          <div className="h-px bg-outline-variant w-full mt-4" />
         </div>
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-1">
           {TABS.map(({ id, label, icon }) => {
             const active = tab === id
             const itemClass = active
-              ? 'flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary-fixed text-secondary font-bold'
-              : 'flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-high transition-colors'
+              ? 'flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#1E3A8A]/10 dark:bg-[#6366F1]/10 text-secondary font-bold border-l-4 border-secondary'
+              : 'flex items-center gap-3 px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-150'
             
             return (
               <button
@@ -219,7 +242,7 @@ export default function App() {
                 >
                   {icon}
                 </span>
-                <span className="font-label-lg ml-3">{label}</span>
+                <span className="font-label-lg ml-2 text-[13px]">{label}</span>
               </button>
             )
           })}
@@ -227,17 +250,17 @@ export default function App() {
         <div className="mt-auto pt-6 border-t border-outline-variant flex flex-col gap-3">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold shadow-sm shrink-0">
                 {currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'JD'}
               </div>
               <div>
-                <p className="font-label-md">{currentUser?.name || 'John Doe'}</p>
-                <p className="text-label-sm text-on-surface-variant">{currentUser?.role || 'Pro Commuter'}</p>
+                <p className="font-label-md text-[13px] text-on-surface font-semibold">{currentUser?.name || 'John Doe'}</p>
+                <p className="text-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">{currentUser?.role || 'Pro Commuter'}</p>
               </div>
             </div>
             <button 
               onClick={handleLogout}
-              className="text-[#64748b] hover:text-red-500 transition-colors p-1.5 rounded-full hover:bg-surface-container-high"
+              className="text-tertiary hover:text-red-600 hover:bg-rose-500/10 transition-all p-2 rounded-full active:scale-95 duration-100"
               title="Logout"
             >
               <span className="material-symbols-outlined text-[18px]">logout</span>
@@ -248,62 +271,105 @@ export default function App() {
 
       {/* Main Content Wrapper */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen pb-24 lg:pb-12">
-        {/* ── App Header (Mockup Design) ── */}
-        <header className="fixed top-0 left-0 lg:left-64 right-0 z-40 flex justify-between items-center px-container-margin h-14 bg-surface/90 border-b border-outline-variant backdrop-blur-md dark:bg-surface-container-high transition-colors lg:border-none lg:bg-transparent">
+        {/* ── App Header (Professional Dashboard) ── */}
+        <header className="fixed top-0 left-0 lg:left-64 right-0 z-40 flex justify-between items-center px-6 h-14 bg-surface border-b border-outline-variant transition-colors">
+          {/* Left: Page Title / Burger Menu */}
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsMobileDrawerOpen(true)}
-              className="lg:hidden material-symbols-outlined text-on-surface hover:bg-surface-container-highest transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out select-none"
+              className="lg:hidden material-symbols-outlined text-on-surface hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-150 ease-in-out select-none"
             >
               menu
             </button>
-            <span className="font-headline-md text-headline-md font-bold text-secondary cursor-pointer select-none">
+            <span className="font-headline-md text-headline-md font-black tracking-tight text-secondary cursor-pointer select-none lg:hidden">
               YatrAI
             </span>
-          {activeTrip && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-error-container text-on-error-container tracking-wider select-none animate-pulse">
-              LIVE
+            <span className="hidden lg:inline-block font-sans font-bold text-[14px] text-on-surface select-none">
+              {PAGE_TITLES[tab]}
             </span>
-          )}
-        </div>
-        
-        {/* Actions inside header */}
-        <div className="flex items-center gap-2">
-          {/* GPS status */}
-          {geo.position && (
-            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5 select-none" title="GPS Active">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> GPS LIVE
-            </span>
-          )}
-          {/* Voice toggle button */}
-          <button
-            onClick={voice.toggle}
-            className={`p-2 rounded-full transition-all duration-150 border flex items-center justify-center select-none active:scale-95 ${
-              voice.enabled 
-                ? 'text-secondary bg-secondary/10 border-secondary/20' 
-                : 'text-tertiary bg-transparent border-transparent hover:text-on-surface'
-            }`}
-            title={voice.enabled ? 'Voice ON' : 'Voice OFF'}
-          >
-            <span className="material-symbols-outlined text-[20px]">{voice.enabled ? 'volume_up' : 'volume_off'}</span>
-          </button>
-
-          {/* Theme switch toggle button */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full transition-all duration-150 border border-transparent text-tertiary hover:text-on-surface flex items-center justify-center select-none active:scale-95"
-            title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            <span className="material-symbols-outlined text-[20px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
-          </button>
-          
-          {/* Balance Widget */}
-          <div className="text-right border-l border-outline-variant pl-3 select-none">
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Balance</p>
-            <p className="text-[14px] font-semibold text-secondary dark:text-secondary-fixed">₹{balance}</p>
+            {activeTrip && (
+              <span className="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container tracking-wider select-none animate-pulse">
+                LIVE
+              </span>
+            )}
           </div>
-        </div>
-      </header>
+
+          {/* Center: Live Running Digital Clock */}
+          <div className="hidden md:flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#1E3A8A]/5 dark:bg-[#6366F1]/5 border border-outline-variant text-[11.5px] font-bold tracking-wide select-none shadow-sm font-sans tabular-nums">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-secondary uppercase">
+              {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </span>
+            <span className="text-outline">|</span>
+            <span className="text-on-surface-variant font-medium">
+              {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+          </div>
+
+          {/* Right: Actions inside header */}
+          <div className="flex items-center gap-2">
+            {/* GPS status */}
+            {geo.position && (
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-500/20 text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5 select-none" title="GPS Active">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" /> GPS LIVE
+              </span>
+            )}
+            {/* Voice toggle button */}
+            <button
+              onClick={voice.toggle}
+              className={`p-2 rounded-full transition-all duration-150 border flex items-center justify-center select-none active:scale-95 ${
+                voice.enabled 
+                  ? 'text-secondary bg-[#1E3A8A]/10 dark:bg-[#6366F1]/10 border-[#1E3A8A]/20 dark:border-[#6366F1]/20' 
+                  : 'text-tertiary bg-transparent border-transparent hover:text-on-surface hover:bg-surface-container-high'
+              }`}
+              title={voice.enabled ? 'Voice ON' : 'Voice OFF'}
+            >
+              <span className="material-symbols-outlined text-[20px]">{voice.enabled ? 'volume_up' : 'volume_off'}</span>
+            </button>
+
+            {/* Theme switch toggle button with premium tooltip popup */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  toggleTheme();
+                  setShowThemeTooltip(false);
+                  localStorage.setItem('yatrai_theme_tooltip_seen', 'true');
+                }}
+                className="p-2 rounded-full transition-all duration-150 border border-transparent text-tertiary hover:text-on-surface hover:bg-surface-container-high flex items-center justify-center select-none active:scale-95"
+                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                <span className="material-symbols-outlined text-[20px]">{isDarkMode ? 'light_mode' : 'dark_mode'}</span>
+              </button>
+
+              {showThemeTooltip && (
+                <div 
+                  className="absolute right-0 top-12 z-50 bg-[#1E3A8A] dark:bg-[#6366F1] text-white text-[11px] font-bold px-3 py-2 rounded-xl shadow-lg border border-white/10 flex items-center gap-2 whitespace-nowrap animate-bounce font-outfit"
+                  style={{ animationDuration: '2s' }}
+                >
+                  <div className="absolute -top-1.5 right-3 w-3 h-3 bg-[#1E3A8A] dark:bg-[#6366F1] rotate-45 border-t border-l border-white/10" />
+                  <span>Click here to switch dark mode</span>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowThemeTooltip(false);
+                      localStorage.setItem('yatrai_theme_tooltip_seen', 'true');
+                    }} 
+                    className="hover:text-slate-300 ml-1 flex items-center justify-center shrink-0"
+                    title="Dismiss hint"
+                  >
+                    <span className="material-symbols-outlined text-[13px]">close</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            {/* Balance Widget */}
+            <div className="text-right border-l border-outline-variant pl-3 select-none">
+              <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Balance</p>
+              <p className="text-[14px] font-extrabold text-gold font-mono">₹{balance}</p>
+            </div>
+          </div>
+        </header>
 
       {/* ── SSE Disruption Alert Toast ── */}
       {lastAlert && (
@@ -393,7 +459,7 @@ export default function App() {
             </div>
           )
         )}
-        {tab === 'wallet' && <WalletPanel />}
+        {tab === 'wallet' && <WalletPanel user={currentUser} />}
         {tab === 'profile' && (
           <JournalPanel
             disruptions={localDisruptions}
@@ -416,7 +482,7 @@ export default function App() {
           const showBadge = id === 'profile' && localDisruptions.length > 0
           
           const navClass = active 
-            ? 'flex flex-col items-center justify-center text-secondary font-bold bg-secondary/10 rounded-xl px-4 py-1.5 active:scale-90 duration-200 scale-95 transition-all'
+            ? 'flex flex-col items-center justify-center text-secondary font-bold bg-[#1E3A8A]/10 dark:bg-[#6366F1]/10 rounded-xl px-4 py-1.5 active:scale-90 duration-200 scale-95 transition-all'
             : 'flex flex-col items-center justify-center text-tertiary px-3.5 py-1.5 hover:text-on-surface-variant dark:hover:text-on-surface transition-all active:scale-90 duration-200'
 
           return (

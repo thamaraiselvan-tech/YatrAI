@@ -1,6 +1,8 @@
 // src/components/WalletPanel.jsx
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useWallet } from '../hooks/useWallet'
+import confetti from 'canvas-confetti'
 
 const TX_ICONS = {
   'Deposit': <span className="material-symbols-outlined text-[18px] text-emerald-500">arrow_downward</span>,
@@ -9,7 +11,7 @@ const TX_ICONS = {
   'Escrow Refund': <span className="material-symbols-outlined text-[18px] text-violet-500">replay</span>,
 }
 
-export default function WalletPanel() {
+export default function WalletPanel({ user }) {
   const { wallet, loading, deposit, refresh } = useWallet()
   const [depositAmt, setDepositAmt] = useState('')
   const [depositing, setDepositing] = useState(false)
@@ -22,6 +24,12 @@ export default function WalletPanel() {
       await deposit(Number(amount))
       setDepositAmt('')
       setShowDeposit(false)
+      // Fire confetti particles
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      })
     } catch (_) {}
     finally { setDepositing(false) }
   }
@@ -49,18 +57,56 @@ export default function WalletPanel() {
   return (
     <div className="flex flex-col gap-5 pb-20 animate-fade-in-up">
 
-      {/* Balance Card / YatraWallet Widget Redesign */}
-      <div className="glass-panel rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden bg-gradient-to-br from-surface to-surface-container-low select-none">
+      {/* Luxury Credit/Debit Style Yatra Card */}
+      <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 text-white rounded-3xl p-6 shadow-2xl overflow-hidden border border-white/10 flex flex-col justify-between h-[185px] w-full max-w-md mx-auto select-none group">
+        {/* Gloss Reflection Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
         
-        {/* Top Header Row */}
-        <div className="flex items-start justify-between w-full relative z-10">
+        {/* Header row */}
+        <div className="flex justify-between items-start relative z-10">
           <div className="flex flex-col">
-            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
-              YatraWallet Balance
+            <span className="text-[10px] tracking-widest text-white/50 uppercase font-outfit font-bold">Yatra Card</span>
+            <span className="text-[11px] font-medium text-white/60 mt-0.5">Unified Transit Pass</span>
+          </div>
+          {/* Chip Graphic */}
+          <div className="w-10 h-7 rounded-md bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 relative overflow-hidden border border-amber-600/30 flex items-center justify-center shrink-0 shadow-sm">
+            <div className="w-6 h-5 border-y border-x border-amber-600/30 absolute" />
+            <div className="w-4 h-4 rounded-full border border-amber-600/30" />
+          </div>
+        </div>
+
+        {/* Card Number */}
+        <div className="text-[18px] tracking-[0.2em] font-mono text-white/90 my-2 relative z-10">
+          ••••  ••••  ••••  8829
+        </div>
+
+        {/* Footer Row */}
+        <div className="flex justify-between items-end relative z-10">
+          <div className="flex flex-col">
+            <span className="text-[9px] uppercase tracking-wider text-white/40">Card Holder</span>
+            <span className="text-[13px] font-semibold text-white/90 truncate max-w-[150px] font-outfit">
+              {user?.name || 'John Doe'}
             </span>
-            <span className="text-[24px] font-bold text-on-surface font-mono mt-1 leading-none select-all">
+          </div>
+          
+          <div className="flex flex-col text-right">
+            <span className="text-[9px] uppercase tracking-wider text-white/40">Balance</span>
+            <span className="text-[18px] font-bold text-cyan-400 font-mono">
               ₹ {available.toFixed(2)}
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Wallet Details & Action buttons Box */}
+      <div className="glass-panel rounded-2xl p-4 flex flex-col gap-4 relative overflow-hidden bg-gradient-to-br from-surface to-surface-container-low select-none">
+        {/* Top Header Row with Actions */}
+        <div className="flex items-center justify-between w-full relative z-10">
+          <div className="flex flex-col">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+              Manage Funds
+            </span>
+            <span className="text-[12px] text-slate-500 mt-0.5">Quickly refresh or top up wallet</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -73,7 +119,7 @@ export default function WalletPanel() {
             </button>
             <button
               onClick={() => setShowDeposit(true)}
-              className="h-10 px-3 bg-secondary hover:brightness-110 text-white font-bold rounded-xl text-[12px] transition-all flex items-center justify-center gap-1 active:scale-95 duration-100"
+              className="h-10 px-3.5 bg-secondary hover:brightness-110 text-white font-bold rounded-xl text-[12px] transition-all flex items-center justify-center gap-1 active:scale-95 duration-100"
             >
               <span className="material-symbols-outlined text-[16px]">add</span> Top Up
             </button>
@@ -88,7 +134,7 @@ export default function WalletPanel() {
           </div>
         )}
 
-        {/* Low Balance Warning (PDF requirement: alert when balance falls below Rs. 150) */}
+        {/* Low Balance Warning */}
         {available < 150 && (
           <div className="flex items-center gap-1.5 bg-rose-500/10 dark:bg-rose-950/20 border border-rose-500/20 rounded-xl px-3 py-2 mt-1 relative z-10 animate-pulse">
             <span className="material-symbols-outlined text-[16px] text-rose-500 shrink-0">warning</span>
@@ -102,7 +148,7 @@ export default function WalletPanel() {
             <span>Spend Allowance Limit</span>
             <span className="font-mono text-slate-600 dark:text-slate-300">₹{totalSpend.toFixed(0)} / ₹{monthlyLimit}</span>
           </div>
-          <div className="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+          <div className="h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
             <div className={`h-full rounded-full transition-all duration-300 ${progressColor}`} style={{ width: `${pct}%` }} />
           </div>
         </div>
@@ -115,11 +161,11 @@ export default function WalletPanel() {
       </div>
 
       {/* Top Up Deposit Modal */}
-      {showDeposit && (
+      {showDeposit && createPortal(
         <div className="modal-overlay" onClick={() => setShowDeposit(false)}>
           <div className="modal-content animate-fade-in-up dark:bg-surface-container-high" onClick={e => e.stopPropagation()}
                style={{ border: '1px solid var(--outline-variant)' }}>
-            <div className="uts-header border-b border-outline-variant/20 pb-3 flex items-center gap-3">
+            <div className="uts-header border-b border-outline-variant pb-3 flex items-center gap-3">
               <div className="uts-logo-circle bg-secondary text-white font-bold w-9 h-9 rounded-full flex items-center justify-center text-[16px]">
                 ₹
               </div>
@@ -136,7 +182,7 @@ export default function WalletPanel() {
                   key={amt}
                   onClick={() => handleDeposit(amt)}
                   className="bg-surface-container-low text-secondary font-bold rounded-xl h-11 text-[12px]
-                             border border-outline-variant hover:bg-secondary/10 transition-all flex items-center justify-center active:scale-[0.97]"
+                             border border-outline-variant hover:bg-[#1E3A8A]/10 dark:hover:bg-[#6366F1]/10 transition-all flex items-center justify-center active:scale-[0.97]"
                 >
                   +₹{amt}
                 </button>
@@ -169,7 +215,8 @@ export default function WalletPanel() {
               Cancel Payment
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Transactions Statement */}
@@ -182,7 +229,7 @@ export default function WalletPanel() {
         ) : (
           <div className="flex flex-col">
             {txns.slice(0, 20).map((tx, i) => (
-              <div key={i} className="flex items-center gap-3 py-2.5 border-b border-outline-variant/10 last:border-0 hover:bg-surface-container/20 rounded-lg px-1 transition-colors duration-150">
+              <div key={i} className="flex items-center gap-3 py-2.5 border-b border-outline-variant last:border-0 hover:bg-surface-container rounded-lg px-1 transition-colors duration-150">
                 <div className="w-8 h-8 rounded-lg bg-surface-container border border-outline-variant flex items-center justify-center shrink-0">
                   {TX_ICONS[tx.type] ?? <span className="material-symbols-outlined text-[18px]">arrow_upward</span>}
                 </div>

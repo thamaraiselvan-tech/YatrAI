@@ -44,20 +44,22 @@ export default function RouteCard({ mood, route, selected, recommended, onClick 
   if (!theme || !route) return null
 
   const bgClass = selected
-    ? 'bg-slate-50 dark:bg-slate-800/40 border-2 shadow-md scale-[1.02] -translate-y-0.5'
-    : 'bg-surface dark:bg-[#111625] hover:bg-slate-50/50 dark:hover:bg-[#141C33] border hover:shadow-md'
+    ? 'bg-surface border-2 shadow-sm scale-[1.01] -translate-y-0.5'
+    : 'bg-white/60 dark:bg-slate-900/40 hover:bg-surface dark:hover:bg-surface-container border hover:shadow-md hover:translate-y-[-1px]'
 
-  const borderColor = selected ? 'border-secondary' : 'border-outline-variant dark:border-[#2A354F]'
+  const borderColor = selected 
+    ? 'border-secondary' 
+    : 'border-outline-variant dark:border-[#2A354F]'
 
   return (
     <button
       onClick={onClick}
       style={{ borderLeft: `4px solid ${theme.color}` }}
-      className={`relative w-full h-[120px] rounded-[16px] p-4 flex flex-col justify-between text-left transition-all duration-200 ${bgClass} ${borderColor}`}
+      className={`relative w-full h-[122px] rounded-2xl p-4 flex flex-col justify-between text-left transition-all duration-300 ticket-cutout ${bgClass} ${borderColor}`}
     >
       {/* Top Row */}
-      <div className="flex justify-between items-start w-full">
-        <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${theme.lightTag} ${theme.darkTag}`}>
+      <div className="flex justify-between items-start w-full relative z-10">
+        <div className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${theme.lightTag} ${theme.darkTag}`}>
           {theme.label}
         </div>
         <span 
@@ -72,17 +74,17 @@ export default function RouteCard({ mood, route, selected, recommended, onClick 
       </div>
 
       {/* Middle Metric */}
-      <div className="font-headline-md text-headline-md leading-none text-on-surface font-bold mt-1">
+      <div className="font-headline-md text-[22px] leading-none text-on-surface font-extrabold mt-1.5 relative z-10 tracking-tight">
         {theme.metric(route)}
       </div>
 
       {/* Bottom Arrival Time */}
-      <div className="text-[12px] font-medium text-on-surface-variant/80">
+      <div className="text-[11.5px] font-bold text-on-surface-variant relative z-10 uppercase tracking-wide">
         {route.end_time_str} arrival
       </div>
 
       {recommended && (
-        <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 text-[9px] font-bold rounded-full bg-[#D97706] text-white tracking-wider select-none font-outfit uppercase shadow-sm">
+        <span className="absolute -top-2 right-4 px-2 py-0.5 text-[8.5px] font-bold rounded-full bg-[#B5945B] text-white tracking-widest select-none uppercase shadow-sm border border-[#B5945B]/10 z-20">
           Recommended
         </span>
       )}

@@ -253,6 +253,18 @@ export default function JournalPanel({ disruptions, onDisruptionsChange, user, o
     } finally { setBusy(false) }
   }
 
+  async function handleQuickAsk(promptQ) {
+    setQuestion(promptQ)
+    setBusy(true)
+    setAnswer('')
+    try {
+      const res = await queryJournal(promptQ)
+      setAnswer(res.answer)
+    } catch (e) {
+      setAnswer('Could not get an answer right now.')
+    } finally { setBusy(false) }
+  }
+
   async function handleDelete(id) {
     await deleteJournalEntry(id)
     await loadJournal()
@@ -281,222 +293,335 @@ export default function JournalPanel({ disruptions, onDisruptionsChange, user, o
   const logs = journal?.logs ?? []
 
   return (
-    <div className="flex flex-col gap-4 pb-10">
-      
-      {/* Profile Header */}
-      <div className="glass-panel rounded-2xl p-4 flex items-center justify-between animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-[18px]">
-            {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'JD'}
-          </div>
-          <div>
-            <h2 className="text-[15px] font-bold text-on-surface">{user?.name || 'John Doe'}</h2>
-            <p className="text-[12px] text-slate-400 dark:text-slate-500">{user?.role || 'Pro Commuter'} · {user?.email}</p>
-          </div>
+    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-gutter lg:gap-stack-lg pb-10 items-start w-full">
+      {/* Left Column: Tab switcher and tab contents */}
+      <div className="lg:col-span-7 flex flex-col gap-4 w-full">
+        {/* Sliding tabs block */}
+        <div className="flex bg-surface-container-high dark:bg-[#111827] border border-outline-variant rounded-2xl p-1 gap-1 select-none h-[52px] items-center">
+          {[
+            { id: 'logs', label: 'Logs', icon: 'book' },
+            { id: 'analytics', label: 'Analytics', icon: 'bar_chart' },
+            { id: 'ask', label: 'Ask AI', icon: 'forum' },
+            { id: 'simulator', label: 'Live Status', icon: 'sensors' },
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex-grow flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-semibold transition-all ${
+                tab === t.id
+                  ? 'bg-secondary text-white shadow-sm'
+                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
         </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100/50 font-bold rounded-xl text-[12px] transition-colors border border-red-500/10 active:scale-95 duration-100"
-        >
-          <span className="material-symbols-outlined text-[16px]">logout</span>
-          <span>Logout</span>
-        </button>
-      </div>
 
-      {/* Sliding tabs block */}
-      <div className="flex bg-surface-container-high dark:bg-[#111827] border border-outline-variant rounded-2xl p-1 gap-1 select-none h-[52px] items-center">
-        {[
-          { id: 'logs', label: 'Logs', icon: 'book' },
-          { id: 'analytics', label: 'Analytics', icon: 'bar_chart' },
-          { id: 'ask', label: 'Ask AI', icon: 'forum' },
-          { id: 'simulator', label: 'Live Status', icon: 'sensors' },
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex-grow flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-semibold transition-all ${
-              tab === t.id
-                ? 'bg-secondary text-white shadow-sm'
-                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
-            <span>{t.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ── Logs tab ── */}
-      {tab === 'logs' && (
-        <>
-          {/* Semantic log input */}
-          <div className="glass-panel rounded-2xl p-4 flex flex-col gap-3">
-            <p className="text-[12px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-outfit">Log a Journey</p>
-            <div className="relative">
-              <textarea
-                value={logText}
-                onChange={e => setLogText(e.target.value)}
-                rows={2}
-                placeholder={'"Took suburban rail from Guindy to Egmore, paid ₹10"'}
-                className="w-full bg-surface-container-low dark:bg-[#070b13] border border-outline-variant rounded-xl px-3 py-3 pr-12
-                           text-[13px] text-on-surface placeholder-slate-400 resize-none outline-none
-                           focus:border-secondary transition-colors font-sans"
-              />
+        {/* ── Logs tab ── */}
+        {tab === 'logs' && (
+          <>
+            {/* Semantic log input */}
+            <div className="glass-panel rounded-2xl p-4 flex flex-col gap-3">
+              <p className="text-[12px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-outfit">Log a Journey</p>
+              <div className="relative">
+                <textarea
+                  value={logText}
+                  onChange={e => setLogText(e.target.value)}
+                  rows={2}
+                  placeholder={'"Took suburban rail from Guindy to Egmore, paid ₹10"'}
+                  className="w-full bg-surface-container-low dark:bg-[#070b13] border border-outline-variant rounded-xl px-3 py-3 pr-12
+                             text-[13px] text-on-surface placeholder-slate-400 resize-none outline-none
+                             focus:border-secondary transition-colors font-sans"
+                />
+                <button
+                  onClick={listening ? stopVoice : startVoice}
+                  className={`absolute right-1 top-1 w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
+                    listening ? 'text-white bg-secondary animate-mic-pulse' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">{listening ? 'mic_off' : 'mic'}</span>
+                </button>
+              </div>
               <button
-                onClick={listening ? stopVoice : startVoice}
-                className={`absolute right-1 top-1 w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
-                  listening ? 'text-white bg-secondary animate-mic-pulse' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
+                onClick={handleSemanticLog}
+                disabled={busy || !logText.trim()}
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-secondary to-accent hover:shadow-md hover:shadow-secondary/15 text-white
+                           font-semibold rounded-xl h-11 text-[13px] transition-all active:scale-[0.98]
+                           disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 dark:disabled:from-slate-800/40 dark:disabled:to-slate-800/40 dark:disabled:text-slate-600 disabled:shadow-none disabled:pointer-events-none"
               >
-                <span className="material-symbols-outlined text-[20px]">{listening ? 'mic_off' : 'mic'}</span>
+                {busy ? (
+                  <span className="material-symbols-outlined text-[16px] animate-spin">sync</span>
+                ) : (
+                  <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                )}
+                {busy ? 'Processing...' : 'Log via AI'}
               </button>
             </div>
-            <button
-              onClick={handleSemanticLog}
-              disabled={busy || !logText.trim()}
-              className="flex items-center justify-center gap-2 bg-secondary hover:brightness-110 text-white
-                         font-medium rounded-xl h-11 text-[13px] disabled:opacity-30 transition-all active:scale-[0.98]"
-            >
-              {busy ? (
-                <span className="material-symbols-outlined text-[16px] animate-spin">sync</span>
-              ) : (
-                <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
-              )}
-              {busy ? 'Processing...' : 'Log via AI'}
-            </button>
-          </div>
 
-          {/* Log entries */}
-          <div className="flex flex-col gap-3">
-            {logs.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 dark:text-slate-500 text-[12px]">No travel logs yet</div>
-            ) : logs.map(log => (
-              <div key={log.id} className="glass-panel rounded-2xl p-4 flex flex-col gap-2 hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex flex-col">
-                    <p className="text-[13.5px] font-semibold text-on-surface">
-                      {log.from_node.replace(/_/g, ' ')} → {log.to_node.replace(/_/g, ' ')}
+            {/* Log entries */}
+            <div className="flex flex-col gap-3">
+              {logs.length === 0 ? (
+                <div className="glass-panel rounded-2xl p-8 text-center flex flex-col items-center gap-3 animate-fade-in-up select-none">
+                  <span className="material-symbols-outlined text-[40px] text-secondary/30">auto_stories</span>
+                  <div>
+                    <p className="text-[13px] font-bold text-on-surface">No logs found</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 max-w-xs leading-normal mx-auto">
+                      Your journal is empty. Type or speak a sentence above (e.g., "Took suburban rail from Guindy to Egmore, paid ₹10") to log a trip using YatrAI.
                     </p>
-                    <p className="text-[12px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{log.date}</p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className="text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
-                      style={{
-                        background: `${CATEGORY_COLORS[log.category] ?? '#3B82F6'}15`,
-                        color: CATEGORY_COLORS[log.category] ?? '#3B82F6',
-                      }}
-                    >
-                      {log.category}
-                    </span>
-                    <button
-                      onClick={() => handleDelete(log.id)}
-                      className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors"
-                      title="Delete log"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
                   </div>
                 </div>
-
-                <div className="flex gap-1.5 flex-wrap">
-                  {log.modes_used?.map(mode => {
-                    const m = MODE_CONFIG[mode]
-                    if (!m) return null
-                    return (
-                      <span key={mode} className="text-[12px] px-2 py-0.5 rounded-full bg-surface-container-high border border-outline-variant flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px]">{PASS_MODE_ICONS[mode] || 'directions_walk'}</span>
-                        <span className="text-slate-500 dark:text-slate-400">{m.label}</span>
+              ) : logs.map(log => (
+                <div key={log.id} className="glass-panel rounded-2xl p-4 flex flex-col gap-2 hover:border-slate-300 dark:hover:border-slate-700 transition-all animate-fade-in-up">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <p className="text-[13.5px] font-semibold text-on-surface truncate">
+                        {log.from_node.replace(/_/g, ' ')} → {log.to_node.replace(/_/g, ' ')}
+                      </p>
+                      <p className="text-[12px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{log.date}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className="text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
+                        style={{
+                          background: `${CATEGORY_COLORS[log.category] ?? '#3B82F6'}15`,
+                          color: CATEGORY_COLORS[log.category] ?? '#3B82F6',
+                        }}
+                      >
+                        {log.category}
                       </span>
-                    )
-                  })}
-                </div>
+                      <button
+                        onClick={() => handleDelete(log.id)}
+                        className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors"
+                        title="Delete log"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
 
-                {log.notes && (
-                  <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed bg-surface-container-low p-2.5 rounded-xl border border-outline-variant">{log.notes}</p>
-                )}
+                  <div className="flex gap-1.5 flex-wrap">
+                    {log.modes_used?.map(mode => {
+                      const m = MODE_CONFIG[mode]
+                      if (!m) return null
+                      return (
+                        <span key={mode} className="text-[12px] px-2 py-0.5 rounded-full bg-surface-container-high border border-outline-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">{PASS_MODE_ICONS[mode] || 'directions_walk'}</span>
+                          <span className="text-slate-500 dark:text-slate-400">{m.label}</span>
+                        </span>
+                      )
+                    })}
+                  </div>
 
-                <div className="flex gap-4 text-[12px] border-t border-outline-variant/30 pt-2 mt-1">
-                  <span className="text-slate-500 dark:text-slate-400 font-semibold">Fare: <span className="text-on-surface font-mono font-bold">₹{log.cost}</span></span>
-                  <span className="text-teal-600 dark:text-teal-400 font-semibold">Saved: 🌿 <span className="font-bold text-teal-600 dark:text-teal-400">{log.co2_saved}g CO₂</span></span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+                  {log.notes && (
+                    <p className="text-[12px] text-slate-500 dark:text-slate-400 leading-relaxed bg-surface-container-low p-2.5 rounded-xl border border-outline-variant">{log.notes}</p>
+                  )}
 
-      {/* ── Analytics tab ── */}
-      {tab === 'analytics' && <AnalyticsCard analytics={analytics} onRedeem={handleRedeemReward} />}
-
-      {/* ── Ask AI tab ── */}
-      {tab === 'ask' && (
-        <div className="glass-panel rounded-2xl p-4 flex flex-col gap-4">
-          <p className="text-[12px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-outfit">
-            Gemini Assistant
-          </p>
-          
-          {/* Chat bubbles container */}
-          {(question || answer) && (
-            <div className="flex flex-col gap-3 bg-surface-container-low border border-outline-variant rounded-2xl p-3">
-              {question && (
-                <div className="flex justify-end">
-                  <div className="max-w-[85%] bg-secondary/10 border border-secondary/20 rounded-2xl rounded-tr-none px-3 py-2 text-[13px] text-on-surface font-medium">
-                    {question}
+                  <div className="flex gap-4 text-[12px] border-t border-outline-variant/30 pt-2 mt-1">
+                    <span className="text-slate-500 dark:text-slate-400 font-semibold">Fare: <span className="text-on-surface font-mono font-bold">₹{log.cost}</span></span>
+                    <span className="text-teal-600 dark:text-teal-400 font-semibold">Saved: 🌿 <span className="font-bold text-teal-600 dark:text-teal-400">{log.co2_saved}g CO₂</span></span>
                   </div>
                 </div>
-              )}
-              {busy ? (
-                <div className="flex items-center gap-1.5 text-[12px] text-slate-400">
-                  <span className="material-symbols-outlined text-[14px] animate-spin">sync</span>
-                  Gemini is checking logs...
-                </div>
-              ) : answer ? (
-                <div className="flex justify-start items-start gap-2">
-                  <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                    AI
-                  </div>
-                  <div className="max-w-[85%] bg-surface border border-outline-variant rounded-2xl rounded-tl-none px-3 py-2 text-[13px] text-on-surface leading-relaxed shadow-sm">
-                    {answer}
-                  </div>
-                </div>
-              ) : null}
+              ))}
             </div>
-          )}
+          </>
+        )}
 
-          {/* Unified Input bar */}
-          <div className="relative flex items-center h-[52px] rounded-xl bg-surface-container-low border border-outline-variant px-3 focus-within:border-secondary transition-all">
-            <input
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !busy && handleAsk()}
-              placeholder="Ask about travels, carbon footprint, etc."
-              className="flex-1 h-full bg-transparent text-[13px] outline-none text-on-surface placeholder-slate-400"
-              disabled={busy}
-            />
-            <button
-              onClick={handleAsk}
-              disabled={busy || !question.trim()}
-              className="w-11 h-11 flex items-center justify-center text-secondary disabled:opacity-30 shrink-0"
-              title="Send to Gemini"
-            >
-              {busy ? (
-                <span className="material-symbols-outlined text-[18px] animate-spin">sync</span>
-              ) : (
-                <span className="material-symbols-outlined text-[18px]">send</span>
-              )}
-            </button>
+        {/* ── Analytics tab ── */}
+        {tab === 'analytics' && <AnalyticsCard analytics={analytics} onRedeem={handleRedeemReward} />}
+
+        {/* ── Ask AI tab ── */}
+        {tab === 'ask' && (
+          <div className="glass-panel rounded-2xl p-4 flex flex-col gap-4">
+            <p className="text-[12px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-outfit">
+              Gemini Assistant
+            </p>
+            
+            {/* Chat bubbles container */}
+            {(question || answer) && (
+              <div className="flex flex-col gap-3 bg-surface-container-low border border-outline-variant rounded-2xl p-3">
+                {question && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[85%] bg-secondary/10 border border-secondary/20 rounded-2xl rounded-tr-none px-3 py-2 text-[13px] text-on-surface font-medium">
+                      {question}
+                    </div>
+                  </div>
+                )}
+                {busy ? (
+                  <div className="flex items-center gap-1.5 text-[12px] text-slate-400">
+                    <span className="material-symbols-outlined text-[14px] animate-spin">sync</span>
+                    Gemini is checking logs...
+                  </div>
+                ) : answer ? (
+                  <div className="flex justify-start items-start gap-2">
+                    <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                      AI
+                    </div>
+                    <div className="max-w-[85%] bg-surface border border-outline-variant rounded-2xl rounded-tl-none px-3 py-2 text-[13px] text-on-surface leading-relaxed shadow-sm">
+                      {answer}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            {/* Quick Suggestions Pills Grid */}
+            <div className="flex flex-col gap-2 mt-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Quick suggestions</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {[
+                  { label: "💰 Total Spent", query: "How much did I spend in total?" },
+                  { label: "🌿 Carbon Saved", query: "What is my total carbon savings?" },
+                  { label: "🚌 Bus Trips", query: "How many bus trips have I logged?" }
+                ].map((pill, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleQuickAsk(pill.query)}
+                    disabled={busy}
+                    className="px-3 py-2 text-left text-[12px] font-medium rounded-xl bg-surface-container-low border border-outline-variant hover:border-secondary hover:bg-secondary/5 transition-all text-on-surface flex items-center justify-between group active:scale-95 duration-100 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <span>{pill.label}</span>
+                    <span className="material-symbols-outlined text-[14px] text-slate-400 group-hover:text-secondary group-hover:translate-x-0.5 transition-all">chevron_right</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Unified Input bar */}
+            <div className="relative flex items-center h-[52px] rounded-xl bg-surface-container-low border border-outline-variant px-3 focus-within:border-secondary transition-all">
+              <input
+                value={question}
+                onChange={e => setQuestion(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !busy && handleAsk()}
+                placeholder="Ask about travels, carbon footprint, etc."
+                className="flex-1 h-full bg-transparent text-[13px] outline-none text-on-surface placeholder-slate-400"
+                disabled={busy}
+              />
+              <button
+                onClick={handleAsk}
+                disabled={busy || !question.trim()}
+                className="w-11 h-11 flex items-center justify-center text-secondary disabled:opacity-30 shrink-0"
+                title="Send to Gemini"
+              >
+                {busy ? (
+                  <span className="material-symbols-outlined text-[18px] animate-spin">sync</span>
+                ) : (
+                  <span className="material-symbols-outlined text-[18px]">send</span>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Simulator tab ── */}
-      {tab === 'simulator' && (
-        <DisruptionPanel
-          disruptions={disruptions}
-          onDisruptionsChange={onDisruptionsChange}
-        />
-      )}
+        {/* ── Simulator tab ── */}
+        {tab === 'simulator' && (
+          <DisruptionPanel
+            disruptions={disruptions}
+            onDisruptionsChange={onDisruptionsChange}
+          />
+        )}
+      </div>
+
+      {/* Right Column: User profile, Loyalty tier & Green Points summary */}
+      <div className="lg:col-span-5 flex flex-col gap-5 w-full">
+        {/* Compact Profile Card */}
+        <div className="glass-panel rounded-2xl p-5 flex flex-col gap-4 animate-fade-in-up">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-[18px] shadow-sm shrink-0">
+              {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'JD'}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-[15px] font-bold text-on-surface truncate">{user?.name || 'John Doe'}</h2>
+              <p className="text-[11.5px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{user?.role || 'Pro Commuter'} · {user?.email}</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 dark:bg-rose-500/10 text-red-600 dark:text-rose-400 hover:bg-red-100/50 dark:hover:bg-rose-500/20 font-bold rounded-xl text-[12px] transition-all border border-red-500/10 active:scale-95 duration-100"
+          >
+            <span className="material-symbols-outlined text-[16px]">logout</span>
+            <span>Sign Out</span>
+          </button>
+        </div>
+
+        {/* Green Footprint Stats Summary Card */}
+        {analytics && (
+          <div className="glass-panel rounded-2xl p-5 flex flex-col gap-4 animate-fade-in-up">
+            <div className="flex items-center justify-between border-b border-outline-variant pb-3 select-none">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-500 text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>eco</span>
+                <span className="font-outfit font-bold text-[12px] text-on-surface uppercase tracking-wider">Green Footprint</span>
+              </div>
+              {(() => {
+                const pts = Math.round(analytics.co2_saved_kg * 10)
+                return (
+                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-500/15">
+                    Level {Math.floor(pts / 300) + 1} Commuter
+                  </span>
+                )
+              })()}
+            </div>
+
+            {(() => {
+              const pts = Math.round(analytics.co2_saved_kg * 10)
+              const rewardProgress = pts % 100
+              return (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-surface-container-low border border-outline-variant rounded-xl">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none">CO₂ Offsets</p>
+                      <p className="text-[18px] font-black text-emerald-600 dark:text-emerald-400 mt-1 font-mono">{analytics.co2_saved_kg.toFixed(1)} <span className="text-[12px] font-semibold text-slate-500">kg</span></p>
+                    </div>
+                    <div className="p-3 bg-surface-container-low border border-outline-variant rounded-xl">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none">GreenPoints</p>
+                      <p className="text-[18px] font-black text-cyan-600 dark:text-cyan-400 mt-1 font-mono">{pts} <span className="text-[12px] font-semibold text-slate-500">pts</span></p>
+                    </div>
+                  </div>
+
+                  {/* Loyalty Milestone Bar */}
+                  <div className="space-y-1.5 select-none">
+                    <div className="flex justify-between text-[11px] font-medium text-slate-500">
+                      <span>Next Voucher Progress</span>
+                      <span className="font-bold text-cyan-600 font-mono">{rewardProgress}/100 pts</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden border border-black/[0.05] dark:border-white/[0.05]">
+                      <div 
+                        className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500" 
+                        style={{ width: `${rewardProgress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Redeem quick section */}
+                  <div className="flex flex-col gap-2 pt-2 border-t border-outline-variant select-none">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Available Rewards</span>
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        onClick={() => handleRedeemReward(10, 100)}
+                        disabled={pts < 100}
+                        className="w-full flex items-center justify-between px-3 py-2.5 text-[11px] font-bold rounded-xl border transition-all active:scale-95 duration-100 disabled:opacity-40 disabled:pointer-events-none bg-teal-500/5 dark:bg-teal-950/20 text-teal-600 dark:text-teal-400 border-teal-500/10 hover:bg-teal-500/10"
+                      >
+                        <span>🎟️ ₹10 CMRL Ticket Discount</span>
+                        <span className="font-mono bg-teal-500/10 dark:bg-teal-500/20 px-2 py-0.5 rounded text-[10px]">100 pts</span>
+                      </button>
+                      <button 
+                        onClick={() => handleRedeemReward(25, 200)}
+                        disabled={pts < 200}
+                        className="w-full flex items-center justify-between px-3 py-2.5 text-[11px] font-bold rounded-xl border transition-all active:scale-95 duration-100 disabled:opacity-40 disabled:pointer-events-none bg-teal-500/5 dark:bg-teal-950/20 text-teal-600 dark:text-teal-400 border-teal-500/10 hover:bg-teal-500/10"
+                      >
+                        <span>🛺 ₹25 Ola Auto Voucher</span>
+                        <span className="font-mono bg-teal-500/10 dark:bg-teal-500/20 px-2 py-0.5 rounded text-[10px]">200 pts</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
